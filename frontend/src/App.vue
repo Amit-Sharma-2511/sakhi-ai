@@ -60,7 +60,7 @@ const sendMessage = async () => {
   messages.value.push({ role: 'user', content: userMsg })
   inputMessage.value = ''
   isLoading.value = true
-  
+
   await scrollToBottom()
 
   try {
@@ -74,10 +74,12 @@ const sendMessage = async () => {
     messages.value.push({ role: 'assistant', content: data.response })
     chatTokens.value = data.tokens
 
-    // Play Voice if enabled
-    if (voiceMode.value && data.audio_url) {
-      const audio = new Audio(`${apiBaseUrl}${data.audio_url}`)
-      audio.play().catch(e => console.error("Audio playback failed:", e))
+    // Play Voice if enabled using Browser Speech Synthesis
+    if (voiceMode.value) {
+      const utterance = new SpeechSynthesisUtterance(data.response)
+      utterance.lang = 'en-IN' // Indian English accent
+      utterance.rate = 0.9
+      window.speechSynthesis.speak(utterance)
     }
   } catch (error) {
     console.error("Chat Error:", error)
@@ -102,7 +104,7 @@ const clearChat = () => {
         <h1>SAKHI <span class="ai-tag">AI</span></h1>
         <p class="subtitle">Premium Neural Assistant</p>
       </div>
-      
+
       <div class="controls">
         <div class="control-item">
           <span>Voice Output</span>
@@ -137,8 +139,8 @@ const clearChat = () => {
       </header>
 
       <div class="chat-viewport" ref="scrollContainer">
-        <div v-for="(msg, index) in messages" :key="index" 
-             :class="['bubble-wrap', msg.role === 'user' ? 'user-wrap' : 'bot-wrap']">
+        <div v-for="(msg, index) in messages" :key="index"
+          :class="['bubble-wrap', msg.role === 'user' ? 'user-wrap' : 'bot-wrap']">
           <div class="bubble">
             <div class="msg-content">{{ msg.content }}</div>
           </div>
@@ -155,15 +157,11 @@ const clearChat = () => {
       <div class="input-workspace">
         <div class="input-hub glass">
           <button class="icon-btn" title="Add File">+</button>
-          <input 
-            v-model="inputMessage" 
-            @keyup.enter="sendMessage"
-            type="text" 
-            placeholder="Talk to Sakhi..."
-            :disabled="isLoading"
-          />
+          <input v-model="inputMessage" @keyup.enter="sendMessage" type="text" placeholder="Talk to Sakhi..."
+            :disabled="isLoading" />
           <div class="action-spread">
-            <button @click="toggleListening" :class="['icon-btn mic-btn', { active: isListening }]" title="Voice Command">
+            <button @click="toggleListening" :class="['icon-btn mic-btn', { active: isListening }]"
+              title="Voice Command">
               {{ isListening ? '⭕' : '🎙️' }}
             </button>
             <button @click="sendMessage" class="send-btn" :disabled="isLoading || !inputMessage.trim()">
@@ -300,8 +298,13 @@ body {
 }
 
 @keyframes pulse {
-  70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  70% {
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+  }
 }
 
 /* Chat Workspace */
@@ -344,8 +347,13 @@ body {
   width: 100%;
 }
 
-.user-wrap { justify-content: flex-end; }
-.bot-wrap { justify-content: flex-start; }
+.user-wrap {
+  justify-content: flex-end;
+}
+
+.bot-wrap {
+  justify-content: flex-start;
+}
 
 .bubble {
   max-width: 70%;
@@ -379,7 +387,7 @@ body {
   max-width: 900px;
   margin: 0 auto;
   padding: 12px 24px;
-  border-radius : 24px;
+  border-radius: 24px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -395,7 +403,7 @@ body {
 .input-hub:focus-within {
   border-color: var(--primary);
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .input-hub input {
@@ -436,9 +444,17 @@ body {
 }
 
 @keyframes mic-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .send-btn {
@@ -480,12 +496,24 @@ body {
   animation: typing 1s infinite alternate;
 }
 
-.dot-typing:nth-child(2) { animation-delay: 0.2s; }
-.dot-typing:nth-child(3) { animation-delay: 0.4s; }
+.dot-typing:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot-typing:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes typing {
-  from { transform: translateY(0); opacity: 0.4; }
-  to { transform: translateY(-6px); opacity: 1; }
+  from {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+
+  to {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
 }
 
 /* Switch Styles */
@@ -496,12 +524,19 @@ body {
   height: 20px;
 }
 
-.switch input { opacity: 0; width: 0; height: 0; }
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
 
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: #334155;
   transition: .4s;
 }
@@ -509,16 +544,29 @@ body {
 .slider:before {
   position: absolute;
   content: "";
-  height: 14px; width: 14px;
-  left: 3px; bottom: 3px;
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
   background-color: white;
   transition: .4s;
 }
 
-input:checked + .slider { background-color: var(--primary); }
-input:checked + .slider:before { transform: translateX(16px); }
-.slider.round { border-radius: 34px; }
-.slider.round:before { border-radius: 50%; }
+input:checked+.slider {
+  background-color: var(--primary);
+}
+
+input:checked+.slider:before {
+  transform: translateX(16px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
 
 /* Mobile Responsiveness */
 @media (max-width: 900px) {
@@ -526,9 +574,21 @@ input:checked + .slider:before { transform: translateX(16px); }
     position: absolute;
     left: -280px;
   }
-  .input-workspace { padding: 20px; }
-  .workspace-header { padding: 20px; }
-  .chat-viewport { padding: 20px; }
-  .bubble { max-width: 85%; }
+
+  .input-workspace {
+    padding: 20px;
+  }
+
+  .workspace-header {
+    padding: 20px;
+  }
+
+  .chat-viewport {
+    padding: 20px;
+  }
+
+  .bubble {
+    max-width: 85%;
+  }
 }
 </style>

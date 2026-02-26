@@ -4,8 +4,6 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 import os
-import pyttsx3
-import tempfile
 import uuid
 import time
 from transformers import AutoTokenizer
@@ -105,20 +103,7 @@ def load_brain():
         except Exception as e:
             print(f"Warning: Failed to load brain. Error: {e}")
 
-def generate_voice(text):
-    try:
-        engine = pyttsx3.init('sapi5')
-        voices = engine.getProperty('voices')
-        if len(voices) > 1: engine.setProperty('voice', voices[1].id)
-        engine.setProperty('rate', 160)
-        temp_dir = tempfile.gettempdir()
-        filename = f"sakhi_{uuid.uuid4().hex}.wav"
-        file_path = os.path.join(temp_dir, filename)
-        engine.save_to_file(text, file_path)
-        engine.runAndWait()
-        time.sleep(0.1)
-        return file_path
-    except: return None
+# Removed server-side TTS for deployment compatibility
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -138,18 +123,13 @@ def chat():
     
     if not response: response = "I'm listening. Tell me more!"
     
-    audio_path = generate_voice(response)
     return jsonify({
         'response': response,
         'tokens': [], 
-        'audio_url': f"/audio?path={audio_path}" if audio_path else None
+        'audio_url': None
     })
 
-@app.route('/audio', methods=['GET'])
-def get_audio():
-    path = request.args.get('path')
-    if path and os.path.exists(path): return send_file(path)
-    return "Not found", 404
+# /audio route removed
 
 if __name__ == '__main__':
     load_brain()
