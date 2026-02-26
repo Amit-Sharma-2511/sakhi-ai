@@ -64,7 +64,8 @@ const sendMessage = async () => {
   await scrollToBottom()
 
   try {
-    const response = await axios.post('http://localhost:5000/chat', {
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+    const response = await axios.post(`${apiBaseUrl}/chat`, {
       message: userMsg,
       tokens: chatTokens.value
     })
@@ -75,7 +76,7 @@ const sendMessage = async () => {
 
     // Play Voice if enabled
     if (voiceMode.value && data.audio_url) {
-      const audio = new Audio(`http://localhost:5000${data.audio_url}`)
+      const audio = new Audio(`${apiBaseUrl}${data.audio_url}`)
       audio.play().catch(e => console.error("Audio playback failed:", e))
     }
   } catch (error) {
