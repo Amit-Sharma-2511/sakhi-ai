@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+api_log.txt
+.env
+node_modules/
+dist/
+.vscode/
